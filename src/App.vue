@@ -2,21 +2,19 @@
 
 import AppHeader from './components/Header/AppHeader.vue';
 import CardList from './components/CardList.vue';
-import { onMounted, ref } from 'vue';
-import axios from 'axios';
+import { onMounted, ref, type Ref } from 'vue';
+import apiProducts, { type IProduct } from './utils/api/apiProducts';
 // import AppDrawer from './components/AppDrawer.vue';
 
-const products = ref([]);
+const productsManager = new apiProducts();
+
+const products: Ref<Array<IProduct>> = ref([]);
 
 const getProducts = () => {
-  try {
-    axios
-      .get('https://6ab09c2bf19003f5.mokky.dev/products')
-      .then(response => products.value = response.data)
+  const promise = productsManager.getProducts();
 
-  } catch (error) {
-    console.log(error)
-  }
+  promise
+    .then(response => products.value = response);
 }
 
 onMounted(() => {
