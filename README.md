@@ -38,4 +38,4 @@ yarn  dev
 
 ```
 
-- [Localhost:5173](localhost:5173)
+- http://localhost:5173/
