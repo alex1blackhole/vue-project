@@ -16,7 +16,7 @@ defineProps({
     <div
         class="relative flex flex-col w-full border border-slate-100 rounded-xl p-8 cursor-pointer transition hover:shadow-xl hover:transform hover:-translate-y-2">
         <div @click="onClickFavorite" class="absolute top-8 left-8">
-            <img :src="isFavorite ? '/like-2.svg' : '/like-1.svg'" alt="Favorite" />
+            <img :src="isFavorite ? '/like-2.svg' : '/like-1.svg'" alt="Favorite" loading="lazy"/>
         </div>
         <img :src="img" class="w-full" alt="Sneaker" loading="lazy" />
         <p>{{ title }}</p>
@@ -25,7 +25,7 @@ defineProps({
                 <span class="text-slate-200">Цена:</span>
                 <span class="font-bold">{{ price }} руб.</span>
             </div>
-            <img @click="onClickFavorite" :src="isAdded ? '/checked.svg' : '/plus.svg'" alt="Plus" />
+            <img @click="onClickFavorite" :src="isAdded ? '/checked.svg' : '/plus.svg'" alt="Plus" loading="lazy"/>
         </div>
     </div>
 </template>
