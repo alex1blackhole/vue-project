@@ -1,3 +1,5 @@
 export enum URL {
-  PRODUCTS = 'https://6ab09c2bf19003f5.mokky.dev/products'
+  BASE = 'https://6ab09c2bf19003f5.mokky.dev/',
+  PRODUCTS = BASE + 'products',
+  FAVORITES = BASE + 'favorites'
 }
