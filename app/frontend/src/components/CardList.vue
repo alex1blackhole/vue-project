@@ -4,7 +4,7 @@ import { computed } from 'vue';
 import AppProduct from './AppProduct.vue'; 
 
 const productsProp = defineProps({
-    products: { type: Array, required: true },
+    products: { type: Array, required: true, default: [] },
     addToFavoritesList: Function
 });
 

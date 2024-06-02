@@ -26,80 +26,109 @@ const SELECT_VALUES = [
   }
 ]
 
-const products: Ref<Array<IProduct>> = ref([]);
-const favorites: Ref<Array<IFavorites>> = ref([]);
+interface State {
+  filters: {
+    sortBy: string;
+    searchQuery: string;
+  };
+  favorites: Array<IFavorites>;
+  products: Array<IProduct>;
+}
 
-const filters = reactive({
-  sortBy: '',
-  searchQuery: ''
+const state = reactive<State>({
+  filters: {
+    sortBy: '',
+    searchQuery: '',
+  },
+
+  favorites: [],
+  products: []
 })
 
 const updateProductFavorites = () => {
-  products.value = products.value.map(product => {
+  const { favorites, products } = state;
+
+  if (!favorites || !products) {
+    return
+  }
+
+  const productsWithFavorites = products.map(product => {
     return {
       ...product,
-      isFavorite: favorites.value.some(favorite => favorite.productId === product.productId)
+      isFavorite: favorites.some(favorite => favorite.productId === product.productId)
     }
   })
+
+  state.products = productsWithFavorites;
 }
 
 const getFavorites = async () => {
-  const promise = productsManager.getFavorites();
+  if (state.products.length) {
+    const promise = productsManager.getFavorites();
 
-  promise
-    .then(response => favorites.value = response)
+    promise.then((response) => state.favorites.push(...response))
 
-  promise
-    .then(() => updateProductFavorites())
+    promise
+      .then(() => updateProductFavorites())
+  }
 }
 
 const getProducts = () => {
-  const { sortBy, searchQuery } = filters;
+  const { sortBy, searchQuery } = state.filters;
 
   let params = '';
 
   if (sortBy) {
-    params = params + filters.sortBy
+    params = params + sortBy
   }
 
   if (searchQuery) {
-    params = params + filters.searchQuery
+    params = params + searchQuery
   }
 
   const promise = productsManager.getProducts(params);
 
   promise
-    .then(response => products.value = response);
+    .then(response => state.products = response)
+    .then(() => getFavorites())
 }
 
 const onChangeSelect = (event) => {
-  filters.sortBy = event.target.value;
+  state.filters.sortBy = event.target.value;
 }
 
 const onHandleSearch = (event) => {
-  filters.searchQuery = '&name=*' + event.target.value + '*';
+  state.filters.searchQuery = '&name=*' + event.target.value + '*';
 }
 
 const addToFavoritesList = (productId: number) => {
-  const existingFavorite = favorites.value.find(favorite => favorite.productId === productId);
+  const { favorites } = state;
+
+  const existingFavorite = favorites.find(favorite => favorite.productId === productId);
 
   if (existingFavorite) {
     productsManager.deleteFromFavorites({ productId: existingFavorite.id })
-      .then(() => favorites.value = favorites.value.filter(favorite => favorite.productId !== productId))
+      .then(() => {
+        const index = state.favorites.indexOf(existingFavorite);
+        state.favorites.splice(index, 1);
+      })
       .then(() => updateProductFavorites())
   } else {
     productsManager.addToFavorites({ productId })
-      .then(newFavorite => favorites.value.push(newFavorite))
+      .then(newFavorite => favorites.push(newFavorite))
       .then(() => updateProductFavorites())
   }
 }
 
 onMounted(() => {
   getProducts();
-  getFavorites();
 })
 
-watch(filters, getProducts)
+watch(
+  () => [state.filters.sortBy, state.filters.searchQuery],
+  () => getProducts(),
+  { immediate: true }
+);
 
 </script>
 <template>
@@ -125,9 +154,7 @@ watch(filters, getProducts)
         </div>
       </div>
     </div>
-
-    <CardList :products="products" :addToFavoritesList="addToFavoritesList" />
+    <CardList v-if="Boolean(state.products.length)" :products="state.products"
+      :addToFavoritesList="addToFavoritesList" />
   </div>
 </template>
-
-<style scoped></style>
